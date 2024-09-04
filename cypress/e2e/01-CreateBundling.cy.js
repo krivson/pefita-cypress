@@ -103,6 +103,33 @@ describe("Create Bundling", () => {
     cy.get("#add-item-ebis").as("addItemEbis");
     cy.get("@addItemEbis").click();
 
+    cy.get(
+      ":nth-child(1) > .css-1jlvb0e-MuiStack-root > .MuiAutocomplete-root > .MuiFormControl-root > .MuiOutlinedInput-root > #asynchronous-demo"
+    ).as("inputCatalogPrice");
+    cy.get(
+      ":nth-child(2) > .css-1jlvb0e-MuiStack-root > .MuiAutocomplete-root > .MuiFormControl-root > .MuiOutlinedInput-root > #asynchronous-demo"
+    ).as("inputCatalogProduct");
+
+    cy.get("@inputCatalogPrice").type("Telkom Price List");
+    // cy.get("#asynchronous-demo-option-3").click();
+
+    cy.get("@inputCatalogProduct").type("Telkom Products");
+    // cy.get("#asynchronous-demo-option-0").click();
+
+    cy.get(".MuiGrid-grid-xs-4 > .MuiPaper-root > .MuiBox-root").as(
+      "subCatalog"
+    );
+    cy.get("@subCatalog").contains("Internet Services").click();
+
+    cy.get(".MuiGrid-grid-xs-8 > .MuiPaper-root").as("listProduct");
+    cy.get("@listProduct").contains("AStiWifiBasic").click();
+
+    cy.get("#mui-34").as("buttonAddItem");
+    cy.get("@buttonAddItem").click();
+
+    // cy.get(".MuiDialogActions-root > .MuiButton-root").as("buttonSave");
+    // cy.get("@buttonSave").click();
+
     // cy.get("#flag-bundle-select").as("selectFlagBundle");
     // cy.get(".MuiList-root").as("listFlagBundle");
   });

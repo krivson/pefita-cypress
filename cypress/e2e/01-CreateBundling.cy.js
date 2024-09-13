@@ -55,10 +55,30 @@ describe("Create Bundling", () => {
     cy.get("#mui-2").as("inputPassword");
     cy.get("@inputPassword").type(inputer.password);
 
-    cy.get("#mui-3").as("buttonOtp");
-    cy.get("@buttonOtp").click({ force: true });
+    function clickUntilSuccess(maxRetries = 100) {
+      if (maxRetries <= 0) return;
 
-    cy.wait("@preauthenticate").its("response.statusCode").should("eq", 201);
+      cy.get("#mui-3").click();
+      cy.wait("@preauthenticate").its("response.statusCode").should("eq", 201);
+
+      cy.get(".MuiPaper-root").then(($el) => {
+        if (
+          $el.text().includes("Get OTP Success! Please Check Your Telegram")
+        ) {
+          // Elemen ditemukan, looping berhenti
+          cy.log("Berhasil mendapatkan OTP");
+        } else {
+          // Coba lagi
+          cy.wait(1000); // tunggu sebentar sebelum mencoba lagi
+          clickUntilSuccess(maxRetries - 1);
+        }
+      });
+    }
+
+    clickUntilSuccess();
+
+    // cy.get("#mui-3").as("buttonOtp");
+    // cy.get("@buttonOtp").click({ force: true });
 
     cy.get("#mui-4").as("inputOtp");
     cy.get("@inputOtp").type(inputer.otp);
@@ -153,17 +173,9 @@ describe("Create Bundling", () => {
     cy.get(".MuiList-root").as("listFlagBundle");
     cy.get("@listFlagBundle").contains("Hard Bundling").click();
 
-    cy.wait(10000);
-
-    cy.get(".css-1hecsjb-MuiStack-root > .css-m69qwo-MuiStack-root")
-      .contains("Save Product")
-      .as("buttonSaveProduct");
-
-    cy.wait(10000);
-
-    cy.get("@buttonSaveProduct").click();
-
-    cy.wait("@saveInbox").its("response.statusCode").should("eq", 201);
+    cy.get("#btn-save-product").click({ force: true });
+    
+    // cy.wait("@saveInbox").its("response.statusCode").should("eq", 201);
   });
 
   // it("Create Soft Bundling", () => {

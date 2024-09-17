@@ -173,7 +173,7 @@ describe("Create Bundling", () => {
     cy.get(".MuiList-root").as("listFlagBundle");
     cy.get("@listFlagBundle").contains("Hard Bundling").click();
 
-    cy.get("#btn-save-product").click({ force: true });
+    cy.get('form > .css-1hecsjb-MuiStack-root > .css-m69qwo-MuiStack-root > .css-11bptb8-MuiStack-root > #btn-save-product').click()
     
     // cy.wait("@saveInbox").its("response.statusCode").should("eq", 201);
   });

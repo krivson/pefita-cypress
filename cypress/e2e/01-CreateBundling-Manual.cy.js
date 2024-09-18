@@ -44,23 +44,12 @@ describe("Create Bundling", () => {
     cy.intercept("POST", "http://localhost:3000/product/save-inbox").as(
       "saveInbox"
     );
-    // Intercept untuk endpoint pertama
-    cy.intercept(
-      "POST",
-      "http://localhost:3000/product/draft/approve",
-      (req) => {
-        req.reply((res) => {
-          expect(res.statusCode).to.eq(201); // Pastikan response 201
-        });
-      }
-    ).as("approveDraft");
-
-    // Intercept untuk endpoint kedua
-    cy.intercept("POST", "http://localhost:3000/bridge/donggisig", (req) => {
-      req.reply((res) => {
-        expect(res.statusCode).to.eq(201); // Pastikan response 201
-      });
-    }).as("donggisigBridge");
+    cy.intercept("POST", "http://localhost:3000/product/draft/approve").as(
+      "approveDraft"
+    );
+    cy.intercept("POST", "http://localhost:3000/bridge/donggisig").as(
+      "donggisigBridge"
+    );
   });
 
   it("Create Hard Bundling", () => {
@@ -262,8 +251,8 @@ describe("Create Bundling", () => {
       .contains("Approve")
       .click();
     cy.get(".MuiDialogActions-root").contains("Save").click();
-    cy.wait("@approveDraft");
-    cy.wait("@donggisigBridge");
+    cy.wait("@approveDraft").its("response.statusCode").should("eq", 201);
+    cy.wait("@donggisigBridge").its("response.statusCode").should("eq", 201);
   });
 
   it("Create Soft Bundling", () => {
@@ -285,11 +274,9 @@ describe("Create Bundling", () => {
         if (
           $el.text().includes("Get OTP Success! Please Check Your Telegram")
         ) {
-          // Elemen ditemukan, looping berhenti
           cy.log("Berhasil mendapatkan OTP");
         } else {
-          // Coba lagi
-          cy.wait(1000); // tunggu sebentar sebelum mencoba lagi
+          cy.wait(1000);
           clickUntilSuccess(maxRetries - 1);
         }
       });
@@ -424,11 +411,9 @@ describe("Create Bundling", () => {
         if (
           $el.text().includes("Get OTP Success! Please Check Your Telegram")
         ) {
-          // Elemen ditemukan, looping berhenti
           cy.log("Berhasil mendapatkan OTP");
         } else {
-          // Coba lagi
-          cy.wait(1000); // tunggu sebentar sebelum mencoba lagi
+          cy.wait(1000);
           clickUntilSuccess(maxRetries - 1);
         }
       });
@@ -473,7 +458,7 @@ describe("Create Bundling", () => {
       .contains("Approve")
       .click();
     cy.get(".MuiDialogActions-root").contains("Save").click();
-    cy.wait("@approveDraft");
-    cy.wait("@donggisigBridge");
+    cy.wait("@approveDraft").its("response.statusCode").should("eq", 201);
+    cy.wait("@donggisigBridge").its("response.statusCode").should("eq", 201);
   });
 });

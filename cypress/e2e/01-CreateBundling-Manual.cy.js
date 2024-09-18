@@ -179,9 +179,8 @@ describe("Create Bundling", () => {
     cy.get("#mui-32").as("inputPackageSpeed");
     cy.get("@inputPackageSpeed").type("100000");
 
+    // Upload file manual bagian file Package NDE dengan waktu 30 detik.
     cy.wait(30000);
-    // cy.get("#mui-33").as("filePackageNde");
-    // cy.get("@filePackageNde").selectFile("Dummy.pdf");
 
     cy.get("#flag-bundle-select").as("selectFlagBundle");
     cy.get("@selectFlagBundle").click();
@@ -391,6 +390,7 @@ describe("Create Bundling", () => {
     cy.get("#mui-32").as("inputPackageSpeed");
     cy.get("@inputPackageSpeed").type("100000");
 
+    // Upload file manual bagian file Package NDE dengan waktu 30 detik.
     cy.wait(30000);
 
     cy.get("#flag-bundle-select").as("selectFlagBundle");

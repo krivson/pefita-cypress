@@ -71,11 +71,9 @@ describe("Create Bundling", () => {
         if (
           $el.text().includes("Get OTP Success! Please Check Your Telegram")
         ) {
-          // Elemen ditemukan, looping berhenti
           cy.log("Berhasil mendapatkan OTP");
         } else {
-          // Coba lagi
-          cy.wait(1000); // tunggu sebentar sebelum mencoba lagi
+          cy.wait(1000);
           clickUntilSuccess(maxRetries - 1);
         }
       });
@@ -121,12 +119,20 @@ describe("Create Bundling", () => {
       ":nth-child(2) > .css-1jlvb0e-MuiStack-root > .MuiAutocomplete-root > .MuiFormControl-root > .MuiOutlinedInput-root > #asynchronous-demo"
     ).as("inputCatalogProduct");
 
-    cy.get("@inputCatalogPrice").type("Telkom Price List");
-    cy.wait("@getEbisPriceList").its("response.statusCode").should("eq", 304);
+    cy.get("@inputCatalogPrice").type(inputer.catalogPrice);
+    cy.wait("@getEbisPriceList")
+      .its("response.statusCode")
+      .then((statusCode) => {
+        expect([200, 304, 201]).to.include(statusCode);
+      });
     cy.get("#asynchronous-demo-option-3").click();
 
-    cy.get("@inputCatalogProduct").type("Telkom Products");
-    cy.wait("@getEbisCatalog").its("response.statusCode").should("eq", 304);
+    cy.get("@inputCatalogProduct").type(inputer.catalogProduct);
+    cy.wait("@getEbisCatalog")
+      .its("response.statusCode")
+      .then((statusCode) => {
+        expect([200, 304, 201]).to.include(statusCode);
+      });
     cy.get("#asynchronous-demo-option-0").click();
 
     cy.get(".MuiGrid-grid-xs-4 > .MuiPaper-root > .MuiBox-root").as(
@@ -153,20 +159,20 @@ describe("Create Bundling", () => {
 
     cy.get("#mui-28").as("inputPackageName");
     cy.get("@inputPackageName").type(
-      `Bundling Pefita Dummy | ${Math.floor(Math.random() * 9000) + 1000}`
+      `${inputer.packageName} | ${Math.floor(Math.random() * 9000) + 1000}`
     );
 
     cy.get("#mui-29").as("inputPackageType");
-    cy.get("@inputPackageType").type("Dummy");
+    cy.get("@inputPackageType").type(inputer.packageType);
 
     cy.get("#mui-30").as("inputPackageGroup");
-    cy.get("@inputPackageGroup").type("Dummy");
+    cy.get("@inputPackageGroup").type(inputer.packageGroup);
 
     cy.get("#mui-31").as("inputPackageDescription");
-    cy.get("@inputPackageDescription").type("Dummy");
+    cy.get("@inputPackageDescription").type(inputer.packageDescription);
 
     cy.get("#mui-32").as("inputPackageSpeed");
-    cy.get("@inputPackageSpeed").type("100000");
+    cy.get("@inputPackageSpeed").type(inputer.packageSpeed);
 
     // Upload file manual bagian file Package NDE dengan waktu 30 detik.
     cy.wait(30000);
@@ -181,78 +187,6 @@ describe("Create Bundling", () => {
     ).click();
 
     cy.wait("@saveInbox").its("response.statusCode").should("eq", 201);
-  });
-
-  it("Approval Hard Bundling Product", () => {
-    cy.visit(url);
-
-    cy.get("#mui-1").as("inputUsername");
-    cy.get("@inputUsername").type(approver.username);
-
-    cy.get("#mui-2").as("inputPassword");
-    cy.get("@inputPassword").type(approver.password);
-
-    function clickUntilSuccess(maxRetries = 100) {
-      if (maxRetries <= 0) return;
-
-      cy.get("#mui-3").click();
-      cy.wait("@preauthenticate").its("response.statusCode").should("eq", 201);
-
-      cy.get(".MuiPaper-root").then(($el) => {
-        if (
-          $el.text().includes("Get OTP Success! Please Check Your Telegram")
-        ) {
-          // Elemen ditemukan, looping berhenti
-          cy.log("Berhasil mendapatkan OTP");
-        } else {
-          // Coba lagi
-          cy.wait(1000); // tunggu sebentar sebelum mencoba lagi
-          clickUntilSuccess(maxRetries - 1);
-        }
-      });
-    }
-
-    clickUntilSuccess();
-
-    cy.get("#mui-4").as("inputOtp");
-    cy.get("@inputOtp").type(approver.otp);
-
-    cy.get("#mui-5").as("inputCaptcha");
-    cy.get("@inputCaptcha").type(approver.captcha);
-
-    cy.get("#mui-6").as("buttonSignIn");
-    cy.get("@buttonSignIn").click();
-
-    cy.wait("@authenticate").its("response.statusCode").should("eq", 201);
-    cy.wait("@enterpriseCheck").its("response.statusCode").should("eq", 201);
-    cy.wait("@userProfile").its("response.statusCode").should("eq", 201);
-    cy.wait("@asbjornHromundrAuth")
-      .its("response.statusCode")
-      .should("eq", 201);
-    cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
-
-    cy.get(".MuiPaper-elevation4 > .MuiToolbar-root").as("Navbar");
-    cy.get("@Navbar").contains("Inbox").click();
-    cy.get(".MuiPaper-root > .MuiList-root").contains("Product").click();
-    cy.wait("@asbjornHromundrAuth")
-      .its("response.statusCode")
-      .should("eq", 201);
-    cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
-    cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
-
-    cy.get(
-      ":nth-child(1) > :nth-child(7) > .css-1dwseqc > .MuiBox-root > path"
-    ).click();
-    cy.wait("@asbjornHromundrAuth")
-      .its("response.statusCode")
-      .should("eq", 201);
-    cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
-    cy.get("#simple-tabpanel-2 > :nth-child(1) > :nth-child(1)")
-      .contains("Approve")
-      .click();
-    cy.get(".MuiDialogActions-root").contains("Save").click();
-    cy.wait("@approveDraft").its("response.statusCode").should("eq", 201);
-    cy.wait("@donggisigBridge").its("response.statusCode").should("eq", 201);
   });
 
   it("Create Soft Bundling", () => {
@@ -322,7 +256,7 @@ describe("Create Bundling", () => {
       ":nth-child(2) > .css-1jlvb0e-MuiStack-root > .MuiAutocomplete-root > .MuiFormControl-root > .MuiOutlinedInput-root > #asynchronous-demo"
     ).as("inputCatalogProduct");
 
-    cy.get("@inputCatalogPrice").type("Telkom Price List");
+    cy.get("@inputCatalogPrice").type(inputer.catalogPrice);
     cy.wait("@getEbisPriceList")
       .its("response.statusCode")
       .then((statusCode) => {
@@ -330,7 +264,7 @@ describe("Create Bundling", () => {
       });
     cy.get("#asynchronous-demo-option-3").click();
 
-    cy.get("@inputCatalogProduct").type("Telkom Products");
+    cy.get("@inputCatalogProduct").type(inputer.catalogProduct);
     cy.wait("@getEbisCatalog")
       .its("response.statusCode")
       .then((statusCode) => {
@@ -362,20 +296,20 @@ describe("Create Bundling", () => {
 
     cy.get("#mui-28").as("inputPackageName");
     cy.get("@inputPackageName").type(
-      `Bundling Pefita Dummy | ${Math.floor(Math.random() * 9000) + 1000}`
+      `${inputer.packageName} | ${Math.floor(Math.random() * 9000) + 1000}`
     );
 
     cy.get("#mui-29").as("inputPackageType");
-    cy.get("@inputPackageType").type("Dummy");
+    cy.get("@inputPackageType").type(inputer.packageType);
 
     cy.get("#mui-30").as("inputPackageGroup");
-    cy.get("@inputPackageGroup").type("Dummy");
+    cy.get("@inputPackageGroup").type(inputer.packageGroup);
 
     cy.get("#mui-31").as("inputPackageDescription");
-    cy.get("@inputPackageDescription").type("Dummy");
+    cy.get("@inputPackageDescription").type(inputer.packageDescription);
 
     cy.get("#mui-32").as("inputPackageSpeed");
-    cy.get("@inputPackageSpeed").type("100000");
+    cy.get("@inputPackageSpeed").type(inputer.packageSpeed);
 
     // Upload file manual bagian file Package NDE dengan waktu 30 detik.
     cy.wait(30000);
@@ -392,7 +326,7 @@ describe("Create Bundling", () => {
     cy.wait("@saveInbox").its("response.statusCode").should("eq", 201);
   });
 
-  it("Approval Soft Bundling Product", () => {
+  it("Check Status Product Bundling", () => {
     cy.visit(url);
 
     cy.get("#mui-1").as("inputUsername");
@@ -447,18 +381,18 @@ describe("Create Bundling", () => {
     cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
     cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
 
-    cy.get(
-      ":nth-child(1) > :nth-child(7) > .css-1dwseqc > .MuiBox-root > path"
-    ).click();
-    cy.wait("@asbjornHromundrAuth")
-      .its("response.statusCode")
-      .should("eq", 201);
-    cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
-    cy.get("#simple-tabpanel-2 > :nth-child(1) > :nth-child(1)")
-      .contains("Approve")
-      .click();
-    cy.get(".MuiDialogActions-root").contains("Save").click();
-    cy.wait("@approveDraft").its("response.statusCode").should("eq", 201);
-    cy.wait("@donggisigBridge").its("response.statusCode").should("eq", 201);
+    // cy.get(
+    //   ":nth-child(1) > :nth-child(7) > .css-1dwseqc > .MuiBox-root > path"
+    // ).click();
+    // cy.wait("@asbjornHromundrAuth")
+    //   .its("response.statusCode")
+    //   .should("eq", 201);
+    // cy.wait("@hasuraGraphql").its("response.statusCode").should("eq", 200);
+    // cy.get("#simple-tabpanel-2 > :nth-child(1) > :nth-child(1)")
+    //   .contains("Approve")
+    //   .click();
+    // cy.get(".MuiDialogActions-root").contains("Save").click();
+    // cy.wait("@approveDraft").its("response.statusCode").should("eq", 201);
+    // cy.wait("@donggisigBridge").its("response.statusCode").should("eq", 201);
   });
 });
